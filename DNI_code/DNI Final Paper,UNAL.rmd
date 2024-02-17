@@ -1,0 +1,80 @@
+---
+install.packages("tidyverse")
+install.packages("AmesHousing")
+library("tidyverse")
+library(ggplot2)
+library("dbinom")
+library(AmesHousing)
+library(readxl)
+library(reshape2)
+library(ggplot2)
+library(data.table)
+library(tidyverse)
+library(ggplot2)
+library(gmodels)
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+DNISurvey <- read_excel("C:/Users/mtu42/Desktop/DNISurvey.xlsx")
+df <- read_excel("C:/Users/mtu42/Desktop/DNISurvey.xlsx")
+names(df) <- c("Date","Age", "Gender", "International", "InternationalCountry", "MotherTongue", "Year", "Major", "NewsHours", "Enjoy", "EnjoyWhy", "Languages", "MotherTonguePercent", "SMHours", "SMNewsPercent", "SMPlatforms", "SMPlatformsNews", "SMSources", "SMTrust", "PNTime", "PNType", "PNTrust", "ONTime", "ONType", "ONTrust", "ADTime", "ADType", "ADTrust")
+df$SMHours <-  as.numeric(df$SMHours)
+df$Major[df$Major=="Undecided (If you haven't chosen a major yet but are already decided, feel free to select that major)"]="Undecided"
+df1 <- df[df$Major!="Undecided",]
+Gov <- df[df$Major=="Governance",]
+LS <- df[df$Major=="Life Sciences",]
+CandH <- df[df$Major=="Culture & History",]
+ESS <- df[df$Major=="Earth and Sustainability Sciences",]
+BachelorofArts <- rbind(CandH, Gov)
+BachelorofScience <- rbind(LS, ESS)
+A = data.frame(BachelorofArts)
+B = data.frame(BachelorofScience)
+A <- add_column(A, "Bachelor"="Arts")
+B <- add_column(B, "Bachelor"="Sciences")
+Bachelors <- rbind(A,B)
+
+
+SMHoursMean <- df1%>%group_by(Major)%>%summarize(mean(SMHours))
+colnames(SMHoursMean)[2]="MeanSMHours"
+#NewsHoursMean
+
+
+SMHoursMeanGroups <-Bachelors%>%group_by(Bachelor)%>%summarize(mean(SMHours))
+colnames(SMHoursMeanGroups)[2]="MeanSMHours"
+#NewsHoursMeanGroups
+
+
+ggplot(data = Bachelors) + geom_point(mapping = aes(x = Major , y = SMHours, color=Bachelor ) )
+
+ggplot(data = Bachelors) + geom_boxplot(mapping = aes(x= Bachelor ,y= SMHours, color= Bachelor))+theme(legend.position="none")+labs(y="Daily Social Media Usage in hours")
+
+ggplot(data=df1)+geom_boxplot(mapping= aes(Major,SMHours, color= Major))+theme(legend.position="none")+scale_x_discrete(labels=c("Culture and History", "ESS/EES", "Governance", "Life Sciences"))+labs(y="Daily  Social Media usage in hours")
+
+ggplot(data=SMHoursMeanGroups) + geom_bar(mapping=aes(Bachelor, MeanSMHours, fill=Bachelor), stat="identity") + theme(legend.position="none") + labs(y="Average daily social media usage in hours", title="Daily Social media usage by Bachelor type")
+
+t.test(BachelorofScience$SMHours, BachelorofArts$SMHours, "greater")
+
+
+
+
+ONTimeMeanGroups <- Bachelors%>%group_by(Bachelor)%>%summarize(mean(ONTime))
+colnames(ONTimeMeanGroups)[2]="MeanONTime" #ONTimeMeanGroups
+
+ggplot(data = Bachelors) + geom_point(mapping = aes(x = Major , y = ONTime, color=Bachelor ) )
+
+ggplot(data=Bachelors)+geom_boxplot(mapping= aes(Bachelor,ONTime, color= Bachelor))+theme(legend.position="none")+labs(y="Online Newspaper usage per week in minutes")
+
+
+ggplot(data=ONTimeMeanGroups) + geom_bar(mapping=aes(Bachelor, MeanONTime, fill=Bachelor), stat="identity") + theme(legend.position="none") + labs(y="Average weekly online newspaper usage in minutes", title="Weekly online newspaper usage by Bachelor type")
+
+ ggplot(data=Bachelors)+geom_boxplot(mapping= aes(Bachelor,ONTime, color= Bachelor))+theme(legend.position="none")+labs(y="Weekly online newspaper usage in minutes")
+ 
+t.test(BachelorofScience$ONTime, BachelorofArts$ONTime, "greater")
+t.test(BachelorofArts$ONTime, BachelorofScience$ONTime, "greater")
+```
+q()
+# clean data
+dat$cname  <- NULL
+
